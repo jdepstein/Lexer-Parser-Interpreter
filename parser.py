@@ -4,6 +4,37 @@ from lexer import Lexer
 from ast import *
 from ast import SLUCSyntaxError as slusyn
 from ast import SLUCTypeError as slutype
+"""
+ Program → { FunctionDef }
+ FunctionDef → Type id ( Params ) { Declarations Statements }
+ Params → Type id { , Type id } | ε
+ Declarations → { Declaration }
+ Declaration → Type Identifier ;
+ Type → int | bool | float
+ Statements → { Statement }
+ Statement → ; | Block | Assignment | IfStatement | WhileStatement
+ | PrintStmt | ReturnStmt
+ ReturnStmt → return Expression ;
+ Block → { Statements }
+ Assignment → id = Expression ;
+ IfStatement → if ( Expression ) Statement [ else Statement ]
+ WhileStatement → while ( Expression ) Statement
+ PrintStmt → print( PrintArg { , PrintArg })
+ PrintArg → Expression | stringlit
+ Expression → Conjunction { || Conjunction }
+ Conjunction → Equality { && Equality }
+ Equality → Relation [ EquOp Relation ]
+ Relation → Addition [ RelOp Addition ]
+ Addition → Term { AddOp Term }
+ Term → Factor { MulOp Factor }
+ Factor → [ UnaryOp ] Primary
+ UnaryOp → - | !
+ Primary → id | intlit | floatlit | true | false | ( Expression )
+ RelOp → < | <= | > | >=
+ AddOp → + | -
+ MulOp → * | / | %
+ EquOp → == | != 
+"""
 
 
 
@@ -58,7 +89,8 @@ class Parser:
                     if self.currtok[1].name == "RCURLY":
                         self.currtok = next(self.tg)
                         return FunctionDef(type, id, params, decs, states)
-                    raise SLUCSyntaxError("ERROR: Missing Right Curly Brace on line {0}".format(str(self.currtok[2] - 1 - 1)))
+                    raise SLUCSyntaxError("ERROR: Missing Right Curly Brace on line {0}"
+                                          .format(str(self.currtok[2] - 1 - 1)))
                 raise SLUCSyntaxError("ERROR: Missing Left Curly Brace on line {0}".format(str(self.currtok[2] - 1)))
             raise SLUCSyntaxError("ERROR: Missing Right Paren on line {0}".format(str(self.currtok[2] - 1)))
         raise SLUCSyntaxError("ERROR: Missing Left Paren on line {0}".format(str(self.currtok[2] - 1)))
@@ -126,7 +158,8 @@ class Parser:
             type = self.currtok[0]
             self.currtok = next(self.tg)
             return type
-        raise SLUCSyntaxError("ERROR: Unexpected token {0} on line {1}".format(self.currtok[1], str(self.currtok[2] - 1)))
+        raise SLUCSyntaxError("ERROR: Unexpected token {0} on line {1}".
+                              format(self.currtok[1], str(self.currtok[2] - 1)))
 
     def Statements(self):
         """
@@ -164,7 +197,8 @@ class Parser:
         if self.currtok[1].name == "return":
             return self.ReturnStmt()
 
-        raise SLUCSyntaxError("ERROR: Unexpected token {0} on line {1}".format(self.currtok[1], str(self.currtok[2] - 1)))
+        raise SLUCSyntaxError("ERROR: Unexpected token {0} on line {1}".
+                              format(self.currtok[1], str(self.currtok[2] - 1)))
 
     def ReturnStmt(self):
         """
@@ -473,7 +507,8 @@ class Parser:
                 return tree
             else:
                 raise SLUCSyntaxError("ERROR: Missing right paren on line {0}".format(str(self.currtok[2] - 1)))
-        raise SLUCSyntaxError("ERROR: Unexpected token {0} on line {1}".format(self.currtok[1], str(self.currtok[2] - 1)))
+        raise SLUCSyntaxError("ERROR: Unexpected token {0} on line {1}".
+                              format(self.currtok[1], str(self.currtok[2] - 1)))
 
 
 # used for raising errors in the parser
@@ -486,14 +521,11 @@ class SLUCSyntaxError(Exception):
         return self.message
 
 
-
-
-
 # main program setup to print out the parser nicely
 if __name__ == '__main__':
 
     syargs = sys.argv
-    p = Parser("test6.sluc")
+    p = Parser(syargs[1])
     try:
         t = p.Program()
         t.type_check()
